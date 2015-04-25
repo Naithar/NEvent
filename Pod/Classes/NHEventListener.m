@@ -8,8 +8,146 @@
 
 #import "NHEventListener.h"
 
+@interface NHEventListener ()
+
+@property (nonatomic, copy) NSString *name;
+@property (nonatomic, copy) NSMutableDictionary *innerEvents;
+@property (nonatomic, strong) NHEventQueue *eventQueue;
+
+@end
+
 @implementation NHEventListener
 
+- (instancetype)init {
+    return [self initWithName:@""];
+}
+
+- (instancetype)initWithName:(NSString*)name {
+    return [self initWithName:name
+           inheritSharedQueue:NO];
+}
+
+- (instancetype)initWithName:(NSString*)name
+          inheritSharedQueue:(BOOL)inherit {
+    return [self initWithName:name
+           inheritSharedQueue:inherit
+             additionalQueues:nil];
+}
+
+- (instancetype)initWithName:(NSString*)name
+          inheritSharedQueue:(BOOL)inherit
+            additionalQueues:(NSArray*)eventQueues {
+    self = [super init];
+
+    if (self) {
+        _name = name;
+        _innerEvents = [@{} mutableCopy];
+        _eventQueue = [[NHEventQueue alloc] init];
+
+        if (inherit) {
+            [_eventQueue addEvents:[NHEventQueue sharedQueue].events];
+        }
+
+        if (eventQueues) {
+            [eventQueues enumerateObjectsUsingBlock:^(NHEventQueue *obj,
+                                                      NSUInteger idx,
+                                                      BOOL *stop) {
+                [_eventQueue addEvents:obj.events];
+            }];
+        }
+    }
+
+    return self;
+}
+
+- (void)addEvent:(NSString*)name
+      withAction:(NHEventBlock)block {
+
+    __weak __typeof(self) weakSelf = self;
+    id observer = [[NSNotificationCenter defaultCenter] addObserverForName:name
+                                                                    object:nil
+                                                                     queue:[NSOperationQueue mainQueue]
+                                                                usingBlock:^(NSNotification *note) {
+                                                                    __strong __typeof(weakSelf) strongSelf = weakSelf;
+                                                                    NSDictionary *data = note.userInfo;
+
+                                                                    [strongSelf performEvent:name
+                                                                                    withData:data];
+                                                                }];
+    self.innerEvents[name] = @{
+                               @"observer" : observer ?: [NSNull null],
+                               @"event" : [NHEvent eventWithName:name
+                                                           block:block]
+                               };
+
+    if ([self.eventQueue containsEvent:name]) {
+        [self performEvent:name
+                  withData:[self.eventQueue eventDataForEvent:name]];
+    }
+}
+
+- (void)performEvent:(NSString*)name
+            withData:(NSDictionary*)data {
+    NHEvent *event = self.innerEvents[name][@"event"];
+
+    if (event
+        && ![event isEqual:[NSNull null]]) {
+        [self.eventQueue removeEvent:name];
+        [event performWithData:data];
+    }
+}
+
+- (void)removeEvent:(NSString*)name {
+    id observer = self.innerEvents[name][@"observer"];
+
+    if (observer
+        && ![observer isEqual:[NSNull null]]) {
+        [[NSNotificationCenter defaultCenter] removeObserver:observer];
+    }
+
+    [self.innerEvents removeObjectForKey:name];
+}
+
+- (void)removeAllEvents {
+    [[self.innerEvents allKeys] enumerateObjectsUsingBlock:^(NSString* obj, NSUInteger idx, BOOL *stop) {
+        [self removeEvent:obj];
+    }];
+}
+
+- (NSDictionary *)events {
+    return self.innerEvents;
+}
+
++ (void)performEvent:(NSString*)name {
+    [self performEvent:name
+              withData:nil];
+}
++ (void)performEvent:(NSString*)name
+            withData:(NSDictionary*)data {
+    [self performEvent:name
+              withData:data
+            addToQueue:NO];
+}
+
++ (void)performEvent:(NSString*)name
+            withData:(NSDictionary*)data
+          addToQueue:(BOOL)addToQueue {
+    if (addToQueue) {
+        [[NHEventQueue sharedQueue] addEvent:name
+                                    withData:data];
+    }
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:name
+                                                        object:nil
+                                                      userInfo:data];
+}
+
+- (void)dealloc {
+    NSLog(@"dealloc event listener");
+
+    [self removeAllEvents];
+    [self.eventQueue clear];
+}
 @end
 
 //// MARK: -

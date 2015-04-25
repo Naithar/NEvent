@@ -23,5 +23,5 @@ typedef void(^NHEventBlock)(NHEvent *event, NSDictionary *data);
 + (instancetype)eventWithName:(NSString*)name
                         block:(NHEventBlock)block;
 
-- (void)callWithData:(NSDictionary*)data;
+- (void)performWithData:(NSDictionary*)data;
 @end

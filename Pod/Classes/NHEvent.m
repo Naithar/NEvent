@@ -31,7 +31,7 @@
     return self;
 }
 
-- (void)callWithData:(NSDictionary*)data {
+- (void)performWithData:(NSDictionary*)data {
     __weak __typeof(self) weakSelf = self;
     if (weakSelf.actionBlock) {
         weakSelf.actionBlock(weakSelf, data);

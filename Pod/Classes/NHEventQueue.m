@@ -60,6 +60,14 @@
     }];
 }
 
+- (BOOL)containsEvent:(NSString*)name {
+    return [[self.innerEvents allKeys] containsObject:name];
+}
+
+- (NSDictionary*)eventDataForEvent:(NSString*)name {
+    return self.innerEvents[name];
+}
+
 - (void)clear {
     [self.innerEvents removeAllObjects];
 }
