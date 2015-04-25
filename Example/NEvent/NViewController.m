@@ -7,6 +7,7 @@
 //
 
 #import "NViewController.h"
+#import <NEvent/NHEvent.h>
 
 @interface NViewController ()
 
@@ -18,6 +19,11 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+
+
+    [[NHEvent eventWithName:nil block:^(NHEvent *event, NSDictionary *data) {
+        NSLog(@"%@", data);
+    }] callWithData:@{ @"name" : @"event listener"}];
 }
 
 - (void)didReceiveMemoryWarning

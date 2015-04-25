@@ -6,23 +6,59 @@
 //
 //
 
-#import "NEvent.h"
+#import "NHEvent.h"
 
-@implementation NEvent
+@interface NHEvent ()
+
+@property (nonatomic, copy) NHEventBlock actionBlock;
 
 @end
 
+@implementation NHEvent
 
-////
-////  EventListener.swift
-////
-////  Created by Naithar on 14.09.14.
-////  Naithar
-////
-////  Copyright (c) 2014 'ITC-Project' LLC http://itcproject.ru
-////  All rights reserved.
-////
-//
+- (instancetype)initWithBlock:(NHEventBlock)block {
+    return [self initWithName:@"" andBlock:block];
+}
+
+- (instancetype)initWithName:(NSString*)name
+                    andBlock:(NHEventBlock)block {
+    self = [super init];
+    if (self) {
+        _name = name ?: @"";
+        _actionBlock = block;
+    }
+
+    return self;
+}
+
+- (void)callWithData:(NSDictionary*)data {
+    __weak __typeof(self) weakSelf = self;
+    if (weakSelf.actionBlock) {
+        weakSelf.actionBlock(weakSelf, data);
+    }
+}
+
++ (instancetype)eventWithName:(NSString*)name
+                        block:(NHEventBlock)block {
+    return [[NHEvent alloc]
+            initWithName:name
+            andBlock:block];
+}
+
+- (void)dealloc {
+    self.actionBlock = nil;
+}
+
+@end
+
+//eventqueue (add-remove queue)
+
+//listener (add-remove event, add-remove observer for event, notifications, pause, enabled)
+//(call events by name)
+
+// observer?
+
+
 //import Foundation
 //
 //public typealias EventClosure = ([String: AnyObject]!) -> ()
@@ -124,86 +160,6 @@
 //
 //}
 //
-/////
-//@objc public class Event {
-//    ///
-//    public var name: String
-//    ///
-//    public var action: EventClosure?
-//    ///
-//    private(set) weak var listener: Listener?
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public init(name: String, action: EventClosure?, listener: Listener?) {
-//        self.name = name
-//        self.action = action
-//        self.listener = listener
-//    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public convenience init(name: String, action: EventClosure?) {
-//        self.init(name: name, action: action, listener: nil)
-//    }
-//
-//    //    public convenience init(action: EventClosure?) {
-//    //        self.init(name: "", action: action, listener: nil)
-//    //    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public func call(data: [String: AnyObject]? = nil) {
-//        self.action?(data)
-//    }
-//
-//    deinit {
-//        //NSLog("")
-//    }
 //}
 //
 //// MARK: -
@@ -696,280 +652,3 @@
 //}
 //// MARK: -
 //
-/////
-//public class ListenerContainer {
-//    ///
-//    public private(set) var name: String!
-//    ///
-//    final lazy public private(set) var listeners: [Listener] = [Listener]()
-//
-//
-//    public subscript (index: Int) -> Listener? {
-//        get {
-//            return (index < 0 || index >= self.listeners.count) ?
-//            nil :
-//            self.listeners[index]
-//        }
-//        set {
-//            if newValue != nil {
-//                if index < 0 || index >= self.listeners.count {
-//                    self.addListener(newValue!)
-//                }
-//                else {
-//                    self.listeners[index] = newValue!
-//                }
-//            }
-//            else {
-//                self.removeAtIndex(index)
-//            }
-//        }
-//    }
-//
-//    public subscript (key: String) -> Listener? {
-//        get {
-//            return self.listenerWithName(key)
-//        }
-//    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public class func sharedInstance() -> ListenerContainer {
-//        struct Static {
-//            static let instance = ListenerContainer(name: "default-listenerContainer")
-//        }
-//
-//        return Static.instance
-//    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public init() {
-//        self.name = "listenerContainer-\(generateRandomString(length: 5))"
-//    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public init(name: String!) {
-//        self.name = name
-//    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public func removeAll() {
-//        self.listeners = []
-//    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//
-//     :return: <#return description#>
-//     */
-//    public func resumeAllListeners() {
-//        for listener in self.listeners {
-//            listener.paused = false
-//        }
-//    }
-//
-//    /**
-//     <#Brief description#>
-//
-//     <#Description#>
-//
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//
-//     :code:
-//     <#code#>
-//     :endcode:
-//
-//     :param: <#param name#> <#param description#>
-//     
-//     :return: <#return description#>
-//     */
-//    public func pauseAllListeners() {
-//        for listener in self.listeners {
-//            listener.paused = true
-//        }
-//    }
-//    
-//    /**
-//     <#Brief description#>
-//     
-//     <#Description#>
-//     
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//     
-//     :code:
-//     <#code#>
-//     :endcode:
-//     
-//     :param: <#param name#> <#param description#>
-//     
-//     :return: <#return description#>
-//     */
-//    public func addListener(listener: Listener) -> Bool {
-//        var existingListener = self.listenerWithName(listener.name)
-//        
-//        if existingListener != nil {
-//            return false
-//        }
-//        
-//        self.listeners.append(listener)
-//        
-//        return true
-//    }
-//    
-//    /**
-//     <#Brief description#>
-//     
-//     <#Description#>
-//     
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//     
-//     :code:
-//     <#code#>
-//     :endcode:
-//     
-//     :param: <#param name#> <#param description#>
-//     
-//     :return: <#return description#>
-//     */
-//    public func listenerWithName(name: String) -> Listener? {
-//        var filtered = self.listeners.filter { (item: Listener) -> Bool in
-//            return item.name == name
-//        }
-//        
-//        return filtered.first
-//    }
-//    
-//    /**
-//     <#Brief description#>
-//     
-//     <#Description#>
-//     
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//     
-//     :code:
-//     <#code#>
-//     :endcode:
-//     
-//     :param: <#param name#> <#param description#>
-//     
-//     :return: <#return description#>
-//     */
-//    public func removeWithName(name: String) {
-//        for var i = 0; i < self.listeners.count; i++ {
-//            if self.listeners[i].name == name {
-//                self.removeAtIndex(i)
-//            }
-//        }
-//    }
-//    
-//    /**
-//     <#Brief description#>
-//     
-//     <#Description#>
-//     
-//     :note <#note#>
-//     :warning <#warning#>
-//     :see <#see also#>
-//     
-//     :code:
-//     <#code#>
-//     :endcode:
-//     
-//     :param: <#param name#> <#param description#>
-//     
-//     :return: <#return description#>
-//     */
-//    public func removeAtIndex(index: Int) {
-//        if index < 0 || index >= self.listeners.count {
-//            return
-//        }
-//        
-//        self.listeners.removeAtIndex(index)
-//    }
-//    
-//    deinit {
-//        self.removeAll()
-//    }
-//}
