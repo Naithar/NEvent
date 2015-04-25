@@ -86,11 +86,9 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
                        NSDictionary *data = note.userInfo;
 
                        if (strongSelf.paused) {
-                           NSNumber* calledByUser = data[kNHListenerUserEvent];
+                           NSNumber* calledByUser = ifNSNull(data[kNHListenerUserEvent], @NO);
 
-                           if (calledByUser
-                               && ![calledByUser isEqual:[NSNull null]]
-                               && [calledByUser boolValue]) {
+                           if ([calledByUser boolValue]) {
                                [strongSelf.eventQueue addEvent:name
                                                       withData:data];
                            }
@@ -121,12 +119,11 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
         return;
     }
 
-    NHEvent *event = self.innerEvents[name][@"event"];
+    NHEvent *event = ifNSNull(self.innerEvents[name][@"event"], nil);
 
-    if (event
-        && ![event isEqual:[NSNull null]]) {
+    if (event) {
         [self.eventQueue removeEvent:name];
-        NSMutableDictionary *eventData = ([data isEqual:[NSNull null]]
+        NSMutableDictionary *eventData = (isNSNull(data)
                                           ? nil
                                           : [data mutableCopy]);
 
@@ -137,10 +134,9 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 }
 
 - (void)removeEvent:(NSString*)name {
-    id observer = self.innerEvents[name][@"observer"];
+    id observer = ifNSNull(self.innerEvents[name][@"observer"], nil);
 
-    if (observer
-        && ![observer isEqual:[NSNull null]]) {
+    if (observer) {
         [[NSNotificationCenter defaultCenter] removeObserver:observer];
     }
 

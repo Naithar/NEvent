@@ -10,6 +10,12 @@
 #import "NHEvent.h"
 #import "NHEventQueue.h"
 
+#define isNSNull(x) \
+([x isKindOfClass:[NSNull class]])
+
+#define ifNSNull(x, y) \
+([x isKindOfClass:[NSNull class]]) ? y : (x ?: y)
+
 @interface NHEventListener : NSObject
 
 @property (nonatomic, readonly, copy) NSString *name;
