@@ -35,9 +35,13 @@
     return self;
 }
 
+- (void)addEvent:(NSString*)name {
+    [self addEvent:name withData:nil];
+}
+
 - (void)addEvent:(NSString*)name
         withData:(NSDictionary*)data {
-    self.innerEvents[name] = data;
+    self.innerEvents[name] = data ?: [NSNull null];
 }
 
 - (void)addEvents:(NSDictionary*)events {

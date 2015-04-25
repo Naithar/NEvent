@@ -29,8 +29,10 @@
                          @"name" : @"event listener"
                          }];
 
+    [[NHEventQueue sharedQueue] addEvent:@"event" withData:nil];
 
-    NHEventListener *listener = [[NHEventListener alloc] init];
+    NHEventListener *listener = [[NHEventListener alloc] initWithName:nil inheritSharedQueue:YES];
+    listener.paused = YES;
     [listener addEvent:@"event" withAction:^(NHEvent *event,
                                              NSDictionary *data) {
         NSLog(@"called event %@", data);
@@ -39,9 +41,10 @@
     [listener performEvent:@"event"
                   withData:nil];
 
-
     [NHEventListener performEvent:@"event"
-                         withData:@{ @"data" : @2 }];
+                         withData:nil];
+
+    listener.paused = NO;
 }
 
 - (void)didReceiveMemoryWarning

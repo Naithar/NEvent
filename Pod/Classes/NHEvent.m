@@ -34,7 +34,7 @@
 - (void)performWithData:(NSDictionary*)data {
     __weak __typeof(self) weakSelf = self;
     if (weakSelf.actionBlock) {
-        weakSelf.actionBlock(weakSelf, data);
+        weakSelf.actionBlock(weakSelf, data.allKeys.count == 0 ? nil : data);
     }
 }
 

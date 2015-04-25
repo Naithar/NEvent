@@ -16,6 +16,9 @@
 @property (nonatomic, readonly, copy) NSDictionary *events;
 @property (nonatomic, readonly, strong) NHEventQueue *eventQueue;
 
+@property (nonatomic, assign) BOOL paused;
+@property (nonatomic, assign) BOOL enabled;
+
 - (instancetype)initWithName:(NSString*)name;
 
 - (instancetype)initWithName:(NSString*)name

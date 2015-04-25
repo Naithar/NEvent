@@ -14,6 +14,7 @@
 
 + (instancetype)sharedQueue;
 
+- (void)addEvent:(NSString*)name;
 - (void)addEvent:(NSString*)name
         withData:(NSDictionary*)data;
 - (void)addEvents:(NSDictionary*)events;
