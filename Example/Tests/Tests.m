@@ -97,6 +97,9 @@ describe(@"event listener test", ^{
         [NHEventListener performEvent:@"event" withData:@{ @"value" : @10 } addToQueue:YES];
 
         NHEventListener *listener = [[NHEventListener alloc] initWithName:@"listener" inheritSharedQueue:YES];
+
+        expect(listener.name).to.equal(@"listener");
+
         [listener addEvent:@"event" withAction:^(NHEvent *event, NSDictionary *data) {
             value = [data[@"value"] integerValue];
         }];
@@ -148,6 +151,7 @@ describe(@"event listener test", ^{
         [NHEventListener performEvent:@"event" withData:@{ @"value" : @10 } addToQueue:YES];
 
         NHEventListener *listener = [[NHEventListener alloc] initWithName:@"listener" inheritSharedQueue:YES];
+
         listener.paused = YES;
 
         [listener addEvent:@"event" withAction:^(NHEvent *event, NSDictionary *data) {
@@ -175,6 +179,39 @@ describe(@"event listener test", ^{
         [NHEventListener performEvent:@"event" withData:@{ @"value" : @10 }];
 
         expect(value).to.equal(0);
+    });
+
+    it(@"will not rewrite existing event", ^{
+        __block NSInteger value = 0;
+
+        [NHEventListener performEvent:@"event" withData:@{ @"value" : @10 } addToQueue:YES];
+
+        NHEventListener *listener = [[NHEventListener alloc] initWithName:@"listener" inheritSharedQueue:YES];
+        [listener addEvent:@"event" withAction:^(NHEvent *event, NSDictionary *data) {
+            value = [data[@"value"] integerValue] * 5;
+        }];
+
+        [listener addEvent:@"event" withAction:^(NHEvent *event, NSDictionary *data) {
+            value = [data[@"value"] integerValue] + 5;
+        }];
+
+        expect([[listener.events allKeys] count]).to.equal(1);
+
+        [NHEventListener performEvent:@"event" withData:@{ @"value" : @10 }];
+
+        expect(value).to.equal(50);
+    });
+
+    it(@"will inherit queues from array", ^{
+        __block BOOL didRun = NO;
+        [[NHEventQueue sharedQueue] addEvent:@"event"];
+
+        NHEventListener *listener = [[NHEventListener alloc] initWithName:@"listener" inheritSharedQueue:NO additionalQueues:@[[NHEventQueue sharedQueue]]];
+        [listener addEvent:@"event" withAction:^(NHEvent *event, NSDictionary *data) {
+            didRun = YES;
+        }];
+
+        expect(didRun).to.equal(YES);
     });
 });
 
