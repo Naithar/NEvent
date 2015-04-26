@@ -35,6 +35,7 @@
 - (void)removeEvent:(NSString*)name;
 - (void)removeAllEvents;
 
+- (void)performEvent:(NSString*)name;
 - (void)performEvent:(NSString*)name
             withData:(NSDictionary*)data;
 

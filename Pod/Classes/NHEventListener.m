@@ -123,6 +123,11 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
     }
 }
 
+- (void)performEvent:(NSString*)name {
+    [self performEvent:name
+              withData:nil];
+}
+
 - (void)performEvent:(NSString*)name
             withData:(NSDictionary*)data {
     if (!self.enabled) {
