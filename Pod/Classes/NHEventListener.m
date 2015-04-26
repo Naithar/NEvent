@@ -8,6 +8,12 @@
 
 #import "NHEventListener.h"
 
+#define isNSNull(x) \
+([x isKindOfClass:[NSNull class]])
+
+#define ifNSNull(x, y) \
+([x isKindOfClass:[NSNull class]]) ? y : (x ?: y)
+
 NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 
 @interface NHEventListener ()
