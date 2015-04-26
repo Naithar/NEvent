@@ -70,6 +70,10 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
     return self;
 }
 
++ (instancetype)listener {
+    return [[NHEventListener alloc] init];
+}
+
 - (void)addEvent:(NSString*)name
       withAction:(NHEventBlock)block {
 

@@ -28,6 +28,8 @@
           inheritSharedQueue:(BOOL)inherit
             additionalQueues:(NSArray*)eventQueues;
 
++ (instancetype)listener;
+
 - (void)addEvent:(NSString*)name
       withAction:(NHEventBlock)block;
 - (void)removeEvent:(NSString*)name;
