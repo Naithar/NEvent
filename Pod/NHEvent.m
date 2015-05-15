@@ -10,6 +10,7 @@
 
 @interface NHEvent ()
 
+@property (nonatomic, weak) id object;
 @property (nonatomic, copy) NHEventBlock actionBlock;
 
 @end
@@ -22,9 +23,16 @@
 
 - (instancetype)initWithName:(NSString*)name
                     andBlock:(NHEventBlock)block {
+    return [self initWithName:name object:nil andBlock:block];
+}
+
+- (instancetype)initWithName:(NSString*)name
+                      object:(id)object
+                    andBlock:(NHEventBlock)block {
     self = [super init];
     if (self) {
         _name = name ?: @"";
+        _object = object;
         _actionBlock = block;
     }
 
@@ -39,10 +47,24 @@
 }
 
 + (instancetype)eventWithName:(NSString*)name
-                        block:(NHEventBlock)block {
+                       object:(id)object
+                        andBlock:(NHEventBlock)block {
+    return [[NHEvent alloc]
+            initWithName:name
+            object:object
+            andBlock:block];
+}
+
++ (instancetype)eventWithName:(NSString*)name
+                        andBlock:(NHEventBlock)block {
     return [[NHEvent alloc]
             initWithName:name
             andBlock:block];
+}
+
++ (instancetype)eventWithBlock:(NHEventBlock)block {
+    return [[NHEvent alloc]
+            initWithBlock:block];
 }
 
 - (void)dealloc {

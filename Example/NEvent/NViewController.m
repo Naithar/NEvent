@@ -22,7 +22,7 @@
 	// Do any additional setup after loading the view, typically from a nib.
 
 
-    [[NHEvent eventWithName:nil block:^(NHEvent *event,
+    [[NHEvent eventWithName:nil andBlock:^(NHEvent *event,
                                         NSDictionary *data) {
         NSLog(@"%@", data);
     }] performWithData:@{

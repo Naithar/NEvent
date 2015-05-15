@@ -112,7 +112,7 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
     self.innerEvents[name] = @{
                                @"observer" : observer ?: [NSNull null],
                                @"event" : [NHEvent eventWithName:name
-                                                           block:block]
+                                                           andBlock:block]
                                };
 
     if ([self.eventQueue containsEvent:name]
