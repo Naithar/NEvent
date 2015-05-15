@@ -31,11 +31,15 @@
 + (instancetype)listener;
 
 - (void)addEvent:(NSString*)name
-       forObject:(id)object
       withAction:(NHEventBlock)block;
 - (void)addEvent:(NSString*)name
+       forObject:(id)object
       withAction:(NHEventBlock)block;
+
 - (void)removeEvent:(NSString*)name;
+- (void)removeEvent:(NSString*)name
+          forObject:(id)object;
+
 - (void)removeAllEvents;
 
 - (void)performEvent:(NSString*)name;

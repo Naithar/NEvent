@@ -85,9 +85,17 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
        forObject:(id)object
       withAction:(NHEventBlock)block {
 
-    if ([[self.innerEvents allKeys] containsObject:name]) {
+    id key = EventKeyForObject(object);
+
+    if (self.innerEvents[key]
+        && [self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]
+        && [[self.innerEvents[key] allKeys] containsObject:name]) {
         return;
     }
+
+    //    if ([[self.innerEvents allKeys] containsObject:name]) {
+    //        return;
+    //    }
 
     __weak __typeof(self) weakSelf = self;
     id observer = [[NSNotificationCenter defaultCenter]
@@ -108,6 +116,7 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 
                            if ([calledByUser boolValue]) {
                                [strongSelf.eventQueue addEvent:name
+                                                     forObject:note.object
                                                       withData:data];
                            }
                        }
@@ -118,18 +127,33 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
                        }
                    }];
 
-    self.innerEvents[name] = @{
-                               @"observer" : observer ?: [NSNull null],
-                               @"event" : [NHEvent eventWithName:name
-                                                          object:object
-                                                        andBlock:block]
-                               };
+    if (!self.innerEvents[key]
+        || ![self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
+        self.innerEvents[key] = [[NSMutableDictionary alloc] init];
+    }
 
-    if ([self.eventQueue containsEvent:name]
+    self.innerEvents[key][name] = @{
+                                    @"observer" : observer ?: [NSNull null],
+                                    @"event" : [NHEvent eventWithName:name
+                                                               object:object
+                                                             andBlock:block]
+                                    };
+
+    //    self.innerEvents[name] = @{
+    //                               @"observer" : observer ?: [NSNull null],
+    //                               @"event" : [NHEvent eventWithName:name
+    //                                                          object:object
+    //                                                        andBlock:block]
+    //                               };
+
+    if ([self.eventQueue containsEvent:name forObject:object]
         && !self.paused
         && self.enabled) {
         [self performEvent:name
-                  withData:[self.eventQueue eventDataForEvent:name]];
+                 forObject:object
+                  withData:[self.eventQueue
+                            eventDataForEvent:name
+                            andObject:object]];
     }
 }
 
@@ -152,10 +176,18 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
         return;
     }
 
-    NHEvent *event = ifNSNull(self.innerEvents[name][@"event"], nil);
+    id key = EventKeyForObject(object);
+
+    if (!self.innerEvents[key]
+        || ![self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
+        return;
+    }
+
+    NHEvent *event = ifNSNull(self.innerEvents[key][name][@"event"], nil);
 
     if (event) {
-        [self.eventQueue removeEvent:name];
+        [self.eventQueue removeEvent:name
+                           forObject:object];
         NSMutableDictionary *eventData = (isNSNull(data)
                                           ? nil
                                           : [data mutableCopy]);
@@ -167,20 +199,44 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 }
 
 - (void)removeEvent:(NSString*)name {
-    id observer = ifNSNull(self.innerEvents[name][@"observer"], nil);
+    [self removeEvent:name
+            forObject:nil];
+}
+
+- (void)removeEvent:(NSString*)name
+          forObject:(id)object {
+    id key = EventKeyForObject(object);
+
+    if (!self.innerEvents[key]
+        || ![self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
+        return;
+    }
+
+    id observer = ifNSNull(self.innerEvents[key][name][@"observer"], nil);
 
     if (observer) {
         [[NSNotificationCenter defaultCenter] removeObserver:observer];
     }
 
-    [self.innerEvents removeObjectForKey:name];
+    [self.innerEvents[key] removeObjectForKey:key];
 }
 
 - (void)removeAllEvents {
-    [[self.innerEvents allKeys] enumerateObjectsUsingBlock:^(NSString* obj,
-                                                             NSUInteger idx,
-                                                             BOOL *stop) {
-        [self removeEvent:obj];
+    //    [[self.innerEvents allKeys] enumerateObjectsUsingBlock:^(NSString* obj,
+    //                                                             NSUInteger idx,
+    //                                                             BOOL *stop) {
+    //        [self removeEvent:obj];
+    //    }];
+
+    [self.innerEvents enumerateKeysAndObjectsUsingBlock:^(id key,
+                                                          id obj, BOOL *stop) {
+        if ([obj isKindOfClass:[NSMutableDictionary class]]) {
+            id object = ObjectForKey(key);
+
+            [obj enumerateKeysAndObjectsUsingBlock:^(id innerKey, id obj, BOOL *stop) {
+                [self removeEvent:innerKey forObject:object];
+            }];
+        }
     }];
 }
 
@@ -228,11 +284,23 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
     _paused = paused;
 
     if (!_paused) {
-        [[self.eventQueue events] enumerateKeysAndObjectsUsingBlock:^(NSString *key,
-                                                                      NSDictionary *obj,
+        [[self.eventQueue events] enumerateKeysAndObjectsUsingBlock:^(id key,
+                                                                      id obj,
                                                                       BOOL *stop) {
-            [self performEvent:key
-                      withData:obj];
+
+
+
+            if ([obj isKindOfClass:[NSMutableDictionary class]]) {
+                id object = ObjectForKey(key);
+
+                [obj enumerateKeysAndObjectsUsingBlock:^(id innerKey, id obj, BOOL *stop) {
+                    [self performEvent:innerKey
+                             forObject:object
+                              withData:obj];
+                }];
+                
+            }
+            
         }];
     }
     [self didChangeValueForKey:@"paused"];
@@ -242,7 +310,7 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 #ifdef DEBUG
     NSLog(@"dealloc event listener");
 #endif
-
+    
     [self removeAllEvents];
     [self.eventQueue clear];
 }

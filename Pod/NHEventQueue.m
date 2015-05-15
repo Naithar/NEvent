@@ -51,21 +51,21 @@
         withData:(NSDictionary*)data {
 //    self.innerEvents[name] = data ?: [NSNull null];
 
-    id key = object ? [NSValue valueWithNonretainedObject:object] : @"";
+    id key = EventKeyForObject(object);
 
     if (!self.innerEvents[key]
         || ![self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
         self.innerEvents[key] = [[NSMutableDictionary alloc] init];
     }
 
-    self.innerEvents[key][name] = data;
+    self.innerEvents[key][name] = data ?: [NSNull null];
 }
 
 - (void)addEvents:(NSDictionary*)events {
     [events enumerateKeysAndObjectsUsingBlock:^(id key,
                                                 NSDictionary* obj,
                                                 BOOL *stop) {
-        self.innerEvents[key] = [obj copy];
+        self.innerEvents[key] = [obj mutableCopy];
     }];
 }
 
@@ -77,7 +77,7 @@
           forObject:(id)object {
 //    [self.innerEvents removeObjectForKey:name];
 
-    id key = object ? [NSValue valueWithNonretainedObject:object] : @"";
+    id key = EventKeyForObject(object);
 
     if (self.innerEvents[key]
         && [self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
@@ -107,7 +107,7 @@
 - (BOOL)containsEvent:(NSString*)name
             forObject:(id)object {
 
-    id key = object ? [NSValue valueWithNonretainedObject:object] : @"";
+    id key = EventKeyForObject(object);
 
     if (self.innerEvents[key]
         && [self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
@@ -119,7 +119,21 @@
 }
 
 - (NSDictionary*)eventDataForEvent:(NSString*)name {
-    return self.innerEvents[name];
+    return [self eventDataForEvent:name
+                         andObject:nil];
+}
+
+- (NSDictionary*)eventDataForEvent:(NSString*)name
+                         andObject:(id)object {
+
+    id key = EventKeyForObject(object);
+
+    if (self.innerEvents[key]
+        && [self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
+        return self.innerEvents[key][name];
+    }
+
+    return nil;
 }
 
 - (void)clear {
@@ -131,6 +145,9 @@
 }
 
 - (void)dealloc {
+#ifdef DEBUG
+    NSLog(@"dealloc event queue");
+#endif
     [self clear];
 }
 @end

@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
+#define EventKeyForObject(object) \
+object ? [NSValue valueWithNonretainedObject:object] : @""
+
+#define ObjectForKey(key) \
+[key isKindOfClass:[NSValue class]] ? [key nonretainedObjectValue] : nil
+
 @interface NHEventQueue : NSObject
 
 @property (nonatomic, readonly, copy) NSDictionary *events;
@@ -38,4 +44,6 @@
 - (void)clear;
 
 - (NSDictionary*)eventDataForEvent:(NSString*)name;
+- (NSDictionary*)eventDataForEvent:(NSString*)name
+                         andObject:(id)object;
 @end

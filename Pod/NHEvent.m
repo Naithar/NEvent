@@ -68,6 +68,9 @@
 }
 
 - (void)dealloc {
+#ifdef DEBUG
+    NSLog(@"dealloc event");
+#endif
     self.actionBlock = nil;
 }
 
