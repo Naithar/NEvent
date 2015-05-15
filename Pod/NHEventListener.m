@@ -76,6 +76,14 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 
 - (void)addEvent:(NSString*)name
       withAction:(NHEventBlock)block {
+    [self addEvent:name
+         forObject:nil
+        withAction:block];
+}
+
+- (void)addEvent:(NSString*)name
+       forObject:(id)object
+      withAction:(NHEventBlock)block {
 
     if ([[self.innerEvents allKeys] containsObject:name]) {
         return;
@@ -105,6 +113,7 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
                        }
                        else {
                            [strongSelf performEvent:name
+                                          forObject:note.object
                                            withData:data];
                        }
                    }];
@@ -112,7 +121,8 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
     self.innerEvents[name] = @{
                                @"observer" : observer ?: [NSNull null],
                                @"event" : [NHEvent eventWithName:name
-                                                           andBlock:block]
+                                                          object:object
+                                                        andBlock:block]
                                };
 
     if ([self.eventQueue containsEvent:name]
@@ -129,6 +139,14 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 }
 
 - (void)performEvent:(NSString*)name
+            withData:(NSDictionary*)data {
+    [self performEvent:name
+             forObject:nil
+              withData:data];
+}
+
+- (void)performEvent:(NSString*)name
+           forObject:(id)object
             withData:(NSDictionary*)data {
     if (!self.enabled) {
         return;
