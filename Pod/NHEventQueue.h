@@ -17,8 +17,15 @@
 - (void)addEvent:(NSString*)name;
 - (void)addEvent:(NSString*)name
         withData:(NSDictionary*)data;
+- (void)addEvent:(NSString*)name
+       forObject:(id)object
+        withData:(NSDictionary*)data;
+
 - (void)addEvents:(NSDictionary*)events;
+
 - (BOOL)containsEvent:(NSString*)name;
+- (BOOL)containsEvent:(NSString*)name
+            forObject:(id)object;
 - (void)removeEvent:(NSString*)name;
 - (void)removeEvents:(NSArray*)names;
 - (void)clear;

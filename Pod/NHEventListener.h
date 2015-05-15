@@ -52,4 +52,8 @@
 + (void)performEvent:(NSString*)name
             withData:(NSDictionary*)data
           addToQueue:(BOOL)addToQueue;
++ (void)performEvent:(NSString*)name
+           forObject:(id)object
+            withData:(NSDictionary*)data
+          addToQueue:(BOOL)addToQueue;
 @end

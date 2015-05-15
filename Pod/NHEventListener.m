@@ -92,7 +92,7 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
     __weak __typeof(self) weakSelf = self;
     id observer = [[NSNotificationCenter defaultCenter]
                    addObserverForName:name
-                   object:nil
+                   object:object
                    queue:[NSOperationQueue mainQueue]
                    usingBlock:^(NSNotification *note) {
                        __strong __typeof(weakSelf) strongSelf = weakSelf;
@@ -202,17 +202,24 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 + (void)performEvent:(NSString*)name
             withData:(NSDictionary*)data
           addToQueue:(BOOL)addToQueue {
+    [self performEvent:name forObject:nil withData:data addToQueue:addToQueue];
+}
 
++ (void)performEvent:(NSString*)name
+           forObject:(id)object
+            withData:(NSDictionary*)data
+          addToQueue:(BOOL)addToQueue {
     NSMutableDictionary *eventData = [(data ?: @{}) mutableCopy];
     [eventData addEntriesFromDictionary:@{ kNHListenerUserEvent : @YES }];
 
     if (addToQueue) {
         [[NHEventQueue sharedQueue] addEvent:name
+                                   forObject:object
                                     withData:eventData];
     }
 
     [[NSNotificationCenter defaultCenter] postNotificationName:name
-                                                        object:nil
+                                                        object:object
                                                       userInfo:eventData];
 }
 

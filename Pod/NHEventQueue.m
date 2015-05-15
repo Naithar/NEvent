@@ -41,6 +41,14 @@
 
 - (void)addEvent:(NSString*)name
         withData:(NSDictionary*)data {
+    [self addEvent:name
+         forObject:nil
+          withData:data];
+}
+
+- (void)addEvent:(NSString*)name
+       forObject:(id)object
+        withData:(NSDictionary*)data {
     self.innerEvents[name] = data ?: [NSNull null];
 }
 
@@ -65,6 +73,12 @@
 }
 
 - (BOOL)containsEvent:(NSString*)name {
+    return [self containsEvent:name
+                     forObject:nil];
+}
+
+- (BOOL)containsEvent:(NSString*)name
+            forObject:(id)object {
     return [[self.innerEvents allKeys] containsObject:name];
 }
 
