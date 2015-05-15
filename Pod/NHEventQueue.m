@@ -49,26 +49,53 @@
 - (void)addEvent:(NSString*)name
        forObject:(id)object
         withData:(NSDictionary*)data {
-    self.innerEvents[name] = data ?: [NSNull null];
+//    self.innerEvents[name] = data ?: [NSNull null];
+
+    id key = object ? [NSValue valueWithNonretainedObject:object] : @"";
+
+    if (!self.innerEvents[key]
+        || ![self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
+        self.innerEvents[key] = [[NSMutableDictionary alloc] init];
+    }
+
+    self.innerEvents[key][name] = data;
 }
 
 - (void)addEvents:(NSDictionary*)events {
-    [events enumerateKeysAndObjectsUsingBlock:^(NSString* key,
+    [events enumerateKeysAndObjectsUsingBlock:^(id key,
                                                 NSDictionary* obj,
                                                 BOOL *stop) {
-        self.innerEvents[key] = obj;
+        self.innerEvents[key] = [obj copy];
     }];
 }
 
 - (void)removeEvent:(NSString*)name {
-    [self.innerEvents removeObjectForKey:name];
+    [self removeEvent:name forObject:nil];
+}
+
+- (void)removeEvent:(NSString*)name
+          forObject:(id)object {
+//    [self.innerEvents removeObjectForKey:name];
+
+    id key = object ? [NSValue valueWithNonretainedObject:object] : @"";
+
+    if (self.innerEvents[key]
+        && [self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
+        [self.innerEvents[key] removeObjectForKey:name];
+    }
 }
 
 - (void)removeEvents:(NSArray*)names {
+    [self removeEvents:names forObject:nil];
+}
+
+- (void)removeEvents:(NSArray*)names
+           forObject:(id)object {
     [names enumerateObjectsUsingBlock:^(NSString *obj,
                                         NSUInteger idx,
                                         BOOL *stop) {
-        [self.innerEvents removeObjectForKey:obj];
+        [self removeEvent:obj
+                forObject:object];
     }];
 }
 
@@ -79,7 +106,16 @@
 
 - (BOOL)containsEvent:(NSString*)name
             forObject:(id)object {
-    return [[self.innerEvents allKeys] containsObject:name];
+
+    id key = object ? [NSValue valueWithNonretainedObject:object] : @"";
+
+    if (self.innerEvents[key]
+        && [self.innerEvents[key] isKindOfClass:[NSMutableDictionary class]]) {
+        return [[self.innerEvents[key] allKeys] containsObject:name];
+    }
+
+    return NO;
+//    return [[self.innerEvents allKeys] containsObject:name];
 }
 
 - (NSDictionary*)eventDataForEvent:(NSString*)name {
@@ -94,4 +130,7 @@
     return self.innerEvents;
 }
 
+- (void)dealloc {
+    [self clear];
+}
 @end

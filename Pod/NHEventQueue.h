@@ -26,8 +26,15 @@
 - (BOOL)containsEvent:(NSString*)name;
 - (BOOL)containsEvent:(NSString*)name
             forObject:(id)object;
+
 - (void)removeEvent:(NSString*)name;
+- (void)removeEvent:(NSString*)name
+          forObject:(id)object;
+
 - (void)removeEvents:(NSArray*)names;
+- (void)removeEvents:(NSArray*)names
+           forObject:(id)object;
+
 - (void)clear;
 
 - (NSDictionary*)eventDataForEvent:(NSString*)name;
