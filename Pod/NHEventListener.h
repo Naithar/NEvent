@@ -10,6 +10,8 @@
 #import "NHEvent.h"
 #import "NHEventQueue.h"
 
+extern NSString *const kNHListenerUserEvent;
+
 @interface NHEventListener : NSObject
 
 @property (nonatomic, readonly, copy) NSString *name;
