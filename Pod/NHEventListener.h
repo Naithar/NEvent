@@ -52,11 +52,25 @@
 
 + (void)performEvent:(NSString*)name;
 + (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent;
++ (void)performEvent:(NSString*)name
+            withData:(NSDictionary*)data;
++ (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent
             withData:(NSDictionary*)data;
 + (void)performEvent:(NSString*)name
             withData:(NSDictionary*)data
           addToQueue:(BOOL)addToQueue;
 + (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent
+            withData:(NSDictionary*)data
+          addToQueue:(BOOL)addToQueue;
++ (void)performEvent:(NSString*)name
+           forObject:(id)object
+            withData:(NSDictionary*)data
+          addToQueue:(BOOL)addToQueue;
++ (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent
            forObject:(id)object
             withData:(NSDictionary*)data
           addToQueue:(BOOL)addToQueue;

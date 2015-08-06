@@ -222,12 +222,6 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 }
 
 - (void)removeAllEvents {
-    //    [[self.innerEvents allKeys] enumerateObjectsUsingBlock:^(NSString* obj,
-    //                                                             NSUInteger idx,
-    //                                                             BOOL *stop) {
-    //        [self removeEvent:obj];
-    //    }];
-
     [self.innerEvents enumerateKeysAndObjectsUsingBlock:^(id key,
                                                           id obj, BOOL *stop) {
         if ([obj isKindOfClass:[NSMutableDictionary class]]) {
@@ -246,9 +240,24 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 
 + (void)performEvent:(NSString*)name {
     [self performEvent:name
+           asUserEvent:YES];
+}
+
++ (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent {
+    [self performEvent:name
               withData:nil];
 }
+
 + (void)performEvent:(NSString*)name
+            withData:(NSDictionary*)data {
+    [self performEvent:name
+           asUserEvent:YES
+              withData:data];
+}
+
++ (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent
             withData:(NSDictionary*)data {
     [self performEvent:name
               withData:data
@@ -258,15 +267,40 @@ NSString *const kNHListenerUserEvent = @"kNHListenerUserEventAttribute";
 + (void)performEvent:(NSString*)name
             withData:(NSDictionary*)data
           addToQueue:(BOOL)addToQueue {
-    [self performEvent:name forObject:nil withData:data addToQueue:addToQueue];
+    [self performEvent:name
+           asUserEvent:YES
+              withData:data
+            addToQueue:addToQueue];
+}
++ (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent
+            withData:(NSDictionary*)data
+          addToQueue:(BOOL)addToQueue {
+    [self performEvent:name
+           asUserEvent:userEvent
+             forObject:nil
+              withData:data
+            addToQueue:addToQueue];
 }
 
 + (void)performEvent:(NSString*)name
            forObject:(id)object
             withData:(NSDictionary*)data
           addToQueue:(BOOL)addToQueue {
+    [self performEvent:name
+           asUserEvent:YES
+             forObject:object
+              withData:data
+            addToQueue:addToQueue];
+}
+
++ (void)performEvent:(NSString*)name
+         asUserEvent:(BOOL)userEvent
+           forObject:(id)object
+            withData:(NSDictionary*)data
+          addToQueue:(BOOL)addToQueue {
     NSMutableDictionary *eventData = [(data ?: @{}) mutableCopy];
-    [eventData addEntriesFromDictionary:@{ kNHListenerUserEvent : @YES }];
+    [eventData addEntriesFromDictionary:@{ kNHListenerUserEvent : @(userEvent) }];
 
     if (addToQueue) {
         [[NHEventQueue sharedQueue] addEvent:name
