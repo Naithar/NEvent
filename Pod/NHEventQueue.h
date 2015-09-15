@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #define EventKeyForObject(object) \
-object ? [NSValue valueWithNonretainedObject:object] : @""
+object ? [NSValue valueWithNonretainedObject:object] : [NSNull null]
 
 #define ObjectForKey(key) \
 [key isKindOfClass:[NSValue class]] ? [key nonretainedObjectValue] : nil
